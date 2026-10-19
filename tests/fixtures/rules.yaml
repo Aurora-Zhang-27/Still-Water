@@ -1,0 +1,179 @@
+# Trading discipline · rules and thresholds
+#
+# Every threshold is defined here; nothing is hard-coded.
+# Don't change the rules during a test period: if a rule feels "in the way", write it down
+# and adjust everything together once the test period ends.
+#
+# level:
+#   block  — hard block: you must write a one-line reason and wait override.cooldown_hours; recorded forever
+#   warn   — warning only
+#   remind — periodic reminder
+#
+# Ratios are decimals (0.13 = 13%) or fraction strings ("1/3").
+#
+# Rules used by the tests (tests/fixtures/sample_history.json). Kept separate from the example rules.yaml in
+# the project root, so editing your own rules never breaks the tests.
+
+version: 1
+
+# What happens after a hard block
+override:
+  reason_required: true
+  cooldown_hours: 24
+
+calendar:
+  timezone: America/New_York   # trading days, earnings windows and "today" all use US Eastern time
+  week_starts_on: monday       # "week-start cash" = cash before the open on the week's first trading day
+
+rules:
+
+  # ── position ───────────────────────────────────────────
+
+  position_cap:
+    category: Position
+    description: Max weight of a single stock (after the buy)
+    level: block
+    default_max_weight: 0.13
+    symbol_max_weight:
+      ORCA: 0.16
+      QQQ: 0.20
+
+  no_buy_over_cap:
+    category: Position
+    description: No more buying a stock already over its cap (same caps as position_cap)
+    level: block
+
+  # ── cash ───────────────────────────────────────────────
+
+  cash_floor:
+    category: Cash
+    description: Cash ratio after the buy (cash / net liquidation value)
+    tiers:                     # strictest first; the first tier hit applies
+      - below: 0.05
+        level: block
+      - below: 0.10
+        level: warn
+
+  # ── buying ─────────────────────────────────────────────
+
+  no_averaging_down:
+    category: Buying
+    description: No adding to a losing position (unrealized loss vs. average cost)
+    level: block
+    max_unrealized_loss: 0.10            # down > 10% → block
+    losing_requires_selection_pass: true # down 0–10%: adding needs all three selection rules to pass
+
+  earnings_blackout:
+    category: Buying
+    description: No buying in the N trading days before earnings
+    level: block
+    trading_days_before: 5
+    include_earnings_day: true           # the earnings day itself is inside the window
+
+  reduce_only_list:
+    category: Buying
+    description: Stocks on the "reduce-only" list cannot be bought
+    level: block
+    symbols:                             # ticker: date added ("30 days on the list" counts from it)
+      PINE: 2026-10-18
+      KITE: 2026-10-18
+    exit_requires:                       # all three must hold before a ticker can leave the list
+      max_weight: 0.08                   # weight ≤ 8%
+      min_days_on_list: 30               # on the list for 30 days
+      new_catalyst_after_added: true     # a catalyst registered again after it was added
+
+  # ── the three selection rules (all checked automatically; any failure → hard block) ──
+
+  selection_near_low:
+    category: Selection
+    description: Near a low (any one condition is enough)
+    level: block
+    max_above_52w_low: 0.15              # ≤ 15% above the 52-week low
+    recent_high_lookback_days: 60        # or: ≥ 20% below the
+    min_below_recent_high: 0.20          #     60-trading-day high
+    valuation_max_line: normal           # or: price in the "cheap–normal" valuation band (≤ normal line)
+
+  selection_pe:
+    category: Selection
+    description: PE not high (price vs. valuation lines; cyclicals see valuation.cyclical)
+    funds_exempt: true                   # funds / ETFs (e.g. QQQ) skip the PE check and need no lines
+    tiers:                               # strictest first; the first tier hit applies
+      - above_line: rich                 # above the rich line → fail
+        level: block
+      - above_line: normal               # between normal and rich → warning
+        level: warn
+
+  selection_catalyst:
+    category: Selection
+    description: Has a catalyst (catalyst and invalidation registered on the watchlist beforehand)
+    level: block
+    require_invalidation: true
+
+  selection_planned:
+    category: Selection
+    description: Planned (on the watchlist for more than N hours, by timestamp)
+    level: block
+    min_hours_on_watchlist: 24
+
+  # ── pace ───────────────────────────────────────────────
+
+  market_drop_day:
+    category: Pace
+    description: Limit the number of buys on a big market drop day
+    level: block
+    index_symbol: QQQ
+    min_daily_drop: 0.02                 # down more than 2% on the day
+    max_buys_per_day: 1
+
+  weekly_buy_budget:
+    category: Pace
+    description: Weekly buying budget
+    level: warn
+    max_fraction_of_week_start_cash: "1/3"
+
+  gtc_review:
+    category: Pace
+    description: Review GTC orders
+    level: remind
+    review_weekday: sunday
+    stale_after_days: 14                 # remind about orders open longer than 14 days
+    flag_if_fill_would_violate: true     # flag orders whose fill would break a rule
+
+  # ── selling (no hard blocks) ──────────────────────────
+
+  take_profit_reminder:
+    category: Selling
+    description: Take profits in stages (by unrealized gain)
+    level: remind
+    gain_levels: [0.50, 1.00]
+
+  invalidation_triggered:
+    category: Selling
+    description: An invalidation condition registered on the watchlist was triggered
+    level: remind
+    require_review: true
+
+  above_rich_line:
+    category: Selling
+    description: Price above the rich line
+    level: warn
+    line: rich
+
+# Valuation lines: updated weekly; multiples and starting EPS come from valuation_seed.csv
+valuation:
+  update_frequency: weekly
+  pressure_multiple_of_normal: 0.75      # pressure line = normal multiple × 0.75 (~25% multiple compression)
+  cyclical:                              # PE is misleading for cyclicals; they use another metric
+    symbols: [MU]
+    metric: pb                           # price-to-book; confirm by hand when data is missing
+
+# Hunch journal
+hunches:
+  review_after_days: 30
+
+# Post-trade audit
+audit:
+  start_date: 2026-10-01       # test period starts here: later fills get violation records; earlier ones are
+                               # audited only as a baseline for comparison
+  check_valid_days: 3          # a buy counts as "checked" if a buy check was done this many days before the
+                               # order (for overrides, counted from the end of the cooldown)

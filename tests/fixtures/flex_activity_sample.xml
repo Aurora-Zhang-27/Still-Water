@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A made-up example shaped like an IBKR Activity Flex Query (XML, default date format yyyyMMdd;HHmmss).
+  The account number, tickers and every number are fictional. Used to test parsing; not a real portfolio.
+
+  Edge cases included on purpose:
+  - one OpenPosition with levelOfDetail="LOT", which must be ignored (SUMMARY only)
+  - one Trade with levelOfDetail="ORDER", which must be ignored (EXECUTION only)
+  - one Trade with buySell="BUY (Ca.)", a cancellation that must be skipped and noted
+  - sells have negative quantities
+  - the KITE fill on 10/15 comes from an order placed on 10/09 (a resting order that filled)
+  - the CashReport has both a BASE_SUMMARY row and a USD row
+-->
+<FlexQueryResponse queryName="discipline-activity" type="AF">
+  <FlexStatements count="1">
+    <FlexStatement accountId="U0000000" fromDate="20261015" toDate="20261016" period="LastNBusinessDays" whenGenerated="20261017;083015">
+      <AccountInformation accountId="U0000000" currency="USD" name="Sample Account" accountType="Individual" />
+      <EquitySummaryInBase>
+        <EquitySummaryByReportDateInBase accountId="U0000000" currency="USD" reportDate="20261015" cash="12000.00" stock="49500.00" total="61500.00" />
+        <EquitySummaryByReportDateInBase accountId="U0000000" currency="USD" reportDate="20261016" cash="3000.00" stock="59000.00" total="62000.00" />
+      </EquitySummaryInBase>
+      <CashReport>
+        <CashReportCurrency accountId="U0000000" currency="BASE_SUMMARY" levelOfDetail="BaseCurrency" fromDate="20261015" toDate="20261016" startingCash="12000.00" endingCash="3000.00" endingSettledCash="12000.00" />
+        <CashReportCurrency accountId="U0000000" currency="USD" levelOfDetail="Currency" fromDate="20261015" toDate="20261016" startingCash="12000.00" endingCash="3000.00" endingSettledCash="12000.00" />
+      </CashReport>
+      <OpenPositions>
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="ORCA" description="ORCA SYSTEMS INC" conid="900001" reportDate="20261016" position="60" markPrice="300.00" positionValue="18000.00" costBasisPrice="210.00" costBasisMoney="12600.00" percentOfNAV="29.03" fifoPnlUnrealized="5400.00" side="Long" levelOfDetail="SUMMARY" />
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="ORCA" description="ORCA SYSTEMS INC" conid="900001" reportDate="20261016" position="60" markPrice="300.00" positionValue="18000.00" costBasisPrice="210.00" costBasisMoney="12600.00" percentOfNAV="29.03" fifoPnlUnrealized="5400.00" side="Long" levelOfDetail="LOT" openDateTime="20250312;101500" />
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="MAPL" description="MAPLE COMMERCE INC" conid="900002" reportDate="20261016" position="40" markPrice="225.00" positionValue="9000.00" costBasisPrice="230.00" costBasisMoney="9200.00" percentOfNAV="14.52" fifoPnlUnrealized="-200.00" side="Long" levelOfDetail="SUMMARY" />
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="KITE" description="KITE INSTRUMENTS CORP" conid="900003" reportDate="20261016" position="12" markPrice="700.00" positionValue="8400.00" costBasisPrice="805.00" costBasisMoney="9660.00" percentOfNAV="13.55" fifoPnlUnrealized="-1260.00" side="Long" levelOfDetail="SUMMARY" />
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="PINE" description="PINE PHOTONICS CORP" conid="900004" reportDate="20261016" position="70" markPrice="80.00" positionValue="5600.00" costBasisPrice="102.00" costBasisMoney="7140.00" percentOfNAV="9.03" fifoPnlUnrealized="-1540.00" side="Long" levelOfDetail="SUMMARY" />
+        <OpenPosition accountId="U0000000" currency="USD" assetCategory="STK" symbol="QQQ" description="INVESCO QQQ TRUST SERIES 1" conid="900006" reportDate="20261016" position="30" markPrice="600.00" positionValue="18000.00" costBasisPrice="480.00" costBasisMoney="14400.00" percentOfNAV="29.03" fifoPnlUnrealized="3600.00" side="Long" levelOfDetail="SUMMARY" />
+      </OpenPositions>
+      <Trades>
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="KITE" description="KITE INSTRUMENTS CORP" conid="900003" tradeID="9000000002" transactionType="ExchTrade" tradeDate="20261015" dateTime="20261015;143001" quantity="4" tradePrice="712.30" proceeds="-2849.20" ibCommission="-1.00" buySell="BUY" openCloseIndicator="O" ibOrderID="8000000002" orderTime="20261009;091500" orderType="LMT" levelOfDetail="EXECUTION" />
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="PINE" description="PINE PHOTONICS CORP" conid="900004" tradeID="9000000003" transactionType="ExchTrade" tradeDate="20261015" dateTime="20261015;150510" quantity="20" tradePrice="81.10" proceeds="-1622.00" ibCommission="-1.00" buySell="BUY" openCloseIndicator="O" ibOrderID="8000000003" orderTime="20261015;150500" orderType="MKT" levelOfDetail="EXECUTION" />
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="MAPL" description="MAPLE COMMERCE INC" conid="900002" tradeID="" transactionType="" tradeDate="20261016" dateTime="20261016;103012" quantity="40" tradePrice="225.50" proceeds="-9020.00" ibCommission="-1.00" buySell="BUY" ibOrderID="8000000001" orderTime="20261016;102955" orderType="LMT" levelOfDetail="ORDER" />
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="MAPL" description="MAPLE COMMERCE INC" conid="900002" tradeID="9000000001" transactionType="ExchTrade" tradeDate="20261016" dateTime="20261016;103012" quantity="40" tradePrice="225.50" proceeds="-9020.00" ibCommission="-1.00" buySell="BUY" openCloseIndicator="O" ibOrderID="8000000001" orderTime="20261016;102955" orderType="LMT" levelOfDetail="EXECUTION" />
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="ORCA" description="ORCA SYSTEMS INC" conid="900001" tradeID="9000000004" transactionType="ExchTrade" tradeDate="20261016" dateTime="20261016;113000" quantity="-5" tradePrice="301.00" proceeds="1505.00" ibCommission="-1.00" buySell="SELL" openCloseIndicator="C" ibOrderID="8000000004" orderTime="20261016;112958" orderType="LMT" levelOfDetail="EXECUTION" />
+        <Trade accountId="U0000000" currency="USD" assetCategory="STK" symbol="ZEST" description="ZEST DEVICES INC" conid="900005" tradeID="9000000005" transactionType="ExchTrade" tradeDate="20261016" dateTime="20261016;120000" quantity="-10" tradePrice="180.00" proceeds="1800.00" ibCommission="0" buySell="BUY (Ca.)" ibOrderID="8000000005" orderTime="20261016;115959" orderType="LMT" levelOfDetail="EXECUTION" />
+      </Trades>
+    </FlexStatement>
+  </FlexStatements>
+</FlexQueryResponse>

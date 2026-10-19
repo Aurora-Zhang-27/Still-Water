@@ -1,0 +1,443 @@
+/* Monet + liquid glass: each page has a Monet painting as its full-page background, and every section is
+   liquid glass floating on it. Colours and fonts live in .streamlit/config.toml; app/ui.py's title() sets
+   the background per page.
+   Rules: no pure black (dusk purple #2E2A3A); slow motion, no bouncing or flicker; style is atmosphere
+   only, numbers and text always stay dark and readable. */
+
+:root {
+  --dusk: #2E2A3A;          /* dusk purple: body text */
+  --dusk-soft: #4A4458;     /* secondary text: still dark enough on glass */
+  --glass:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.50) 42%, rgba(255, 255, 255, 0.42) 100%);
+  --glass-hover:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.58) 42%, rgba(255, 255, 255, 0.50) 100%);
+  --glass-blur: blur(26px) saturate(185%) brightness(1.05);
+  --glass-rim:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),     /* highlight along the top edge */
+    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+    inset 1px 0 0 rgba(255, 255, 255, 0.55),
+    inset -1px 0 0 rgba(255, 255, 255, 0.25);
+  --glass-drop: 0 1px 2px rgba(46, 42, 58, 0.06), 0 22px 50px -20px rgba(46, 42, 58, 0.40);
+  --ripple: 0 0 0 1px rgba(255, 255, 255, 0.7), 0 0 34px 6px rgba(200, 189, 224, 0.45),
+            0 0 70px 14px rgba(169, 191, 214, 0.30);
+  --radius: 30px;
+  --slow: 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ── background: the whole painting, drifting slowly like light on a pond ── */
+
+[data-testid="stApp"] {
+  background: #E9E4EE;
+  isolation: isolate;
+  color: var(--dusk);
+}
+
+[data-testid="stApp"]::before {
+  content: "";
+  position: fixed;
+  inset: -3%;
+  z-index: -2;
+  background-size: cover;
+  background-repeat: no-repeat;
+  animation: pond-drift 70s ease-in-out infinite alternate;
+}
+
+/* a faint layer of morning light that brightens the painting so text on glass reads better */
+[data-testid="stApp"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 15% 5%, rgba(255, 248, 230, 0.32), transparent 70%),
+    linear-gradient(180deg, rgba(250, 247, 252, 0.10), rgba(250, 247, 252, 0.18));
+}
+
+@keyframes pond-drift {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to   { transform: scale(1.06) translate3d(-1.2%, -1%, 0); }
+}
+
+[data-testid="stMainBlockContainer"] {
+  padding-top: 4.2rem;
+  padding-bottom: 4rem;
+  animation: morning-mist 1.2s ease-out both;
+}
+
+/* ── liquid glass ─────────────────────────────────────────────── */
+
+.glass,
+[class*="st-key-panel-"],
+[data-testid="stMainBlockContainer"] > div > div > [data-testid="stForm"],
+[data-testid="stHeader"],
+[data-testid="stSidebar"] {
+  background: var(--glass) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.62) !important;
+  box-shadow: var(--glass-rim), var(--glass-drop);
+}
+
+.glass,
+[class*="st-key-panel-"],
+[data-testid="stMainBlockContainer"] > div > div > [data-testid="stForm"] {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius) !important;
+  transition: background var(--slow), box-shadow var(--slow);
+}
+
+/* a sheen in the top-left corner, like the curve of a glass surface */
+.glass::before,
+[class*="st-key-panel-"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 60% at 12% -10%, rgba(255, 255, 255, 0.65), transparent 60%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 32%);
+  opacity: 0.85;
+}
+
+/* hover: a glow spreads slowly like a ripple; nothing moves or grows */
+.glass:hover,
+[class*="st-key-panel-"]:hover {
+  background: var(--glass-hover) !important;
+  box-shadow: var(--glass-rim), var(--glass-drop), var(--ripple);
+}
+
+[class*="st-key-panel-"] {
+  padding: 1.4rem 1.6rem 1.3rem !important;
+  margin-bottom: 0.6rem;
+}
+
+[data-testid="stMainBlockContainer"] > div > div > [data-testid="stForm"] {
+  padding: 1.4rem 1.6rem !important;
+}
+
+/* header and sidebar: the same glass, without rounded corners */
+[data-testid="stHeader"] {
+  border-width: 0 0 1px 0 !important;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px -22px rgba(46, 42, 58, 0.45);
+}
+
+[data-testid="stSidebar"] {
+  border-width: 0 1px 0 0 !important;
+}
+
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarHeader"] {
+  background: transparent !important;
+}
+
+/* ── inside the glass: no second layer of glass, just hairlines and space ── */
+
+[class*="st-key-panel-"] [data-testid="stVegaLiteChart"],
+[class*="st-key-panel-"] [data-testid="stMetric"] {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+[class*="st-key-panel-"] [data-testid="stDataFrame"] {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7), 0 6px 18px -12px rgba(46, 42, 58, 0.35);
+}
+
+[class*="st-key-panel-"] [data-testid="stExpander"] details {
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 18px;
+}
+
+[class*="st-key-panel-"] [data-testid="stForm"] {
+  background: rgba(255, 255, 255, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 22px;
+  padding: 1.1rem 1.2rem;
+}
+
+[data-testid="stAlertContainer"] {
+  border-radius: 18px;
+  backdrop-filter: none;
+}
+
+/* inputs: translucent white with a soft glow on focus */
+[data-baseweb="input"] > div,
+[data-baseweb="textarea"],
+[data-baseweb="select"] > div,
+[data-testid="stNumberInputContainer"],
+[data-testid="stDateInputField"] {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  border-radius: 16px !important;
+  transition: box-shadow var(--slow), background-color var(--slow);
+}
+
+[data-baseweb="input"]:focus-within,
+[data-baseweb="textarea"]:focus-within {
+  box-shadow: 0 0 0 3px rgba(143, 169, 196, 0.30), 0 0 24px 2px rgba(200, 189, 224, 0.45);
+}
+
+[data-testid^="stBaseButton"] {
+  border-radius: 999px !important;
+  transition: box-shadow var(--slow), background-color var(--slow) !important;
+}
+
+[data-testid^="stBaseButton-secondary"] {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-testid^="stBaseButton"]:hover {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.35), 0 0 28px 4px rgba(200, 189, 224, 0.55);
+}
+
+/* ── text ─────────────────────────────────────────────────────── */
+
+/* headings in Cormorant Garamond */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cormorant Garamond", Georgia, serif !important;
+  color: var(--dusk) !important;
+  letter-spacing: 0.01em;
+}
+
+[data-testid="stHeading"] h2::after,
+[data-testid="stHeading"] h3::after {
+  content: "";
+  display: block;
+  width: 4.5rem;
+  height: 0.45rem;
+  margin-top: 0.2rem;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(169, 191, 214, 0), rgba(126, 111, 168, 0.55) 25%,
+              rgba(199, 130, 125, 0.5) 70%, rgba(199, 130, 125, 0));
+  filter: blur(2px);
+}
+
+[data-testid="stCaptionContainer"], .stCaption {
+  color: var(--dusk-soft) !important;
+}
+
+[data-testid="stMetricValue"] {
+  color: var(--dusk) !important;
+}
+
+[data-testid="stMetricLabel"] {
+  color: var(--dusk-soft) !important;
+}
+
+hr {
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent) !important;
+}
+
+/* ── title plate ──────────────────────────────────────────────── */
+
+.plate {
+  max-width: 760px;
+  padding: 1.5rem 1.9rem 1.2rem;
+  margin: 0 0 1.4rem;
+}
+
+.plate-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--dusk);
+}
+
+.plate-sub {
+  margin: 0.55rem 0 0;
+  color: var(--dusk-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.plate-credit {
+  margin-top: 0.8rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: rgba(46, 42, 58, 0.62);
+}
+
+/* ── sidebar ──────────────────────────────────────────────────── */
+
+.brand {
+  margin: 0.2rem 0 0.4rem;
+  text-align: center;
+}
+
+.brand-name {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: var(--dusk);
+  letter-spacing: 0.03em;
+}
+
+.brand-motto {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--dusk-soft);
+  letter-spacing: 0.08em;
+}
+
+[data-testid="stSidebarNav"] a {
+  border-radius: 16px;
+  transition: background-color var(--slow), box-shadow var(--slow);
+}
+
+[data-testid="stSidebarNav"] a span,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+  color: var(--dusk) !important;
+}
+
+[data-testid="stSidebarNav"] a:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 22px 2px rgba(200, 189, 224, 0.45);
+}
+
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ── metric cards ─────────────────────────────────────────────── */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 0 0 1.2rem;
+}
+
+.kpi {
+  overflow: hidden;
+  padding: 1.05rem 1.25rem 1rem;
+  border-radius: 26px !important;
+}
+
+/* a blurred wash of paint in the corner, coloured by status */
+.kwash {
+  position: absolute;
+  z-index: -1;
+  right: -26px;
+  top: -30px;
+  width: 120px;
+  height: 96px;
+  border-radius: 48% 52% 60% 40% / 55% 45% 55% 45%;
+  opacity: 0.55;
+  filter: blur(16px);
+  transition: opacity 1.2s ease, transform 1.6s ease;
+}
+
+.kpi:hover .kwash {
+  opacity: 0.85;
+  transform: scale(1.12);
+}
+
+.klabel {
+  font-size: 0.85rem;
+  color: var(--dusk-soft);
+}
+
+.kvalue {
+  margin-top: 0.15rem;
+  font-size: 1.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--dusk);
+  line-height: 1.15;
+}
+
+.knote {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--dusk-soft);
+  line-height: 1.4;
+}
+
+.kdot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  vertical-align: 0.05rem;
+}
+
+.spark {
+  width: 100%;
+  height: 34px;
+  margin-top: 0.45rem;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.kmeter {
+  position: relative;
+  height: 8px;
+  margin: 0.7rem 0 0.2rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(46, 42, 58, 0.08);
+}
+
+.kmeter b {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 6px;
+}
+
+.kmeter i {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  margin-left: -1px;
+  background: var(--dusk);
+  border-radius: 1px;
+}
+
+.empty {
+  padding: 0.6rem 0.2rem;
+  color: var(--dusk-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* ── loading: like morning mist lifting ───────────────────────── */
+
+@keyframes morning-mist {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stMainBlockContainer"], [data-testid="stApp"]::before { animation: none; }
+  * { transition: none !important; }
+}
+
+/* ── phones ───────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  [data-testid="stMainBlockContainer"] { padding: 4rem 1rem 3rem !important; }
+  .plate { padding: 1.1rem 1.2rem 1rem; }
+  .plate-title { font-size: 2.2rem; }
+  .plate-sub { font-size: 0.85rem; }
+  [class*="st-key-panel-"] { padding: 1.1rem 1rem 1rem !important; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+  .kvalue { font-size: 1.55rem; }
+  :root { --radius: 24px; }
+}

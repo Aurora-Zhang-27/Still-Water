@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "still-water"
+version = "0.1.0"
+description = "A personal trading discipline system: reads IBKR data and enforces your own trading rules. Read-only; it never places orders."
+requires-python = ">=3.11"
+dependencies = [
+    "PyYAML>=6.0",
+    "requests>=2.31",
+    "yfinance>=0.2.40",
+    "streamlit>=1.35",
+]
+
+[project.optional-dependencies]
+# later: read-only IB Gateway
+gateway = ["ib_async>=1.0"]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["ingest", "db", "rules", "audit", "app"]
+py-modules = ["settings", "textfmt"]
+
+[tool.setuptools.package-data]
+db = ["migrations/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

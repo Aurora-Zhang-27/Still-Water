@@ -1,0 +1,49 @@
+[server]
+enableStaticServing = true               # paintings live in app/static/, referenced as /app/static/<file>
+
+# Monet impressionist theme, taken from "Water Lilies" and "Stacks of Wheat":
+# mist blue, lavender, dawn pink, willow green, hay gold, dusk purple. No pure black (text is dusk purple
+# #2E2A3A), no saturated colours. Liquid glass, glow and fade-in live in app/style.css.
+
+[theme]
+base = "light"
+primaryColor = "#56759A"                 # deep mist blue: buttons, selection
+backgroundColor = "#F5F1EA"              # linen, under the paintings
+secondaryBackgroundColor = "#ECE6EE"     # lavender mist: inputs, table headers
+textColor = "#2E2A3A"                    # dusk purple instead of black
+linkColor = "#56759A"
+borderColor = "#DCD3E2"
+
+# status colours, all low-saturation
+redColor = "#A05A3B"                     # brick: blocked, down
+greenColor = "#336B78"                   # pine: pass, up
+yellowColor = "#A27D33"                  # hay gold: warning
+orangeColor = "#B97D52"
+blueColor = "#56759A"                    # mist blue: info
+violetColor = "#7E6FA8"                  # lavender
+grayColor = "#8A8496"
+
+# Fonts: Cormorant Garamond for headings, a clean sans for body text and numbers.
+# Note: each font setting may hold only one web font; two make the whole theme fail to load
+headingFont = "Cormorant Garamond:https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap, serif"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap, sans-serif"
+headingFontWeights = [600, 600, 600, 600, 600, 600]
+baseFontWeight = 400
+metricValueFontWeight = 600              # numbers one weight heavier than body text
+metricValueFontSize = "1.75rem"          # fits a number like "$123,456" with four metrics side by side
+
+baseRadius = "1.1rem"
+buttonRadius = "1.4rem"
+showWidgetBorder = true
+dataframeBorderColor = "#E3DBE8"
+dataframeHeaderBackgroundColor = "#EEE8F1"
+dataframeHeaderTextColor = "#5B5468"
+
+chartCategoricalColors = ["#56759A", "#7E6FA8", "#C99A9C", "#6E9A7A", "#B38B3A", "#5B4E6E"]
+
+# sidebar set explicitly: it stays light even when the system is in dark mode
+[theme.sidebar]
+backgroundColor = "#ECE6F0"
+secondaryBackgroundColor = "#E2DAE8"
+textColor = "#2E2A3A"
+borderColor = "#DCD3E2"
