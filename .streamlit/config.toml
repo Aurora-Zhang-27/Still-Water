@@ -1,14 +1,14 @@
 [server]
-enableStaticServing = true               # paintings live in app/static/, referenced as /app/static/<file>
+enableStaticServing = true               # artwork lives in app/static/, referenced as /app/static/<file>
 
-# Monet impressionist theme, taken from "Water Lilies" and "Stacks of Wheat":
+# Impressionist-inspired light theme:
 # mist blue, lavender, dawn pink, willow green, hay gold, dusk purple. No pure black (text is dusk purple
 # #2E2A3A), no saturated colours. Liquid glass, glow and fade-in live in app/style.css.
 
 [theme]
 base = "light"
 primaryColor = "#56759A"                 # deep mist blue: buttons, selection
-backgroundColor = "#F5F1EA"              # linen, under the paintings
+backgroundColor = "#F5F1EA"              # linen, under the artwork
 secondaryBackgroundColor = "#ECE6EE"     # lavender mist: inputs, table headers
 textColor = "#2E2A3A"                    # dusk purple instead of black
 linkColor = "#56759A"

@@ -4,7 +4,7 @@
 
 A local, read-only companion for an Interactive Brokers account that enforces **your own** trading rules.
 Before a buy it shows red / yellow / green lights for every rule; after the close it audits every fill on the
-data as it was at fill time; and a set of Streamlit pages — each painted over a Monet in liquid glass — shows
+data as it was at fill time; and a set of Streamlit pages — each with an impressionist-style background under liquid glass — shows
 where you stand. The design is in [SPEC.md](SPEC.md).
 
 **It never places orders.** There is no order placing, changing or cancelling code anywhere, and
@@ -146,17 +146,12 @@ up; QQQ only plays the index. The pages are tested headless with Streamlit's App
 | `app/` | Streamlit pages, components and styles |
 | `tests/` | tests and the fictional sample history |
 
-## Style and credits
+## Style
 
-The look is Monet impressionism with liquid glass: each page has a Monet painting as its full-page background,
-and every section is frosted glass floating on it. Colours and fonts are in `.streamlit/config.toml`, the glass
-in `app/style.css`, and the components in `app/ui.py`.
-
-The paintings are public-domain works by Claude Monet from the
-[Art Institute of Chicago](https://www.artic.edu/open-access/open-access-images) open-access collection (CC0),
-cropped and stored in `app/static/`: *Water Lilies* (1906), *Water Lily Pond* (1900),
-*Stacks of Wheat (End of Summer)*, *Branch of the Seine near Giverny (Mist)*, *Poppy Field (Giverny)*,
-*Stacks of Wheat (Sunset, Snow Effect)*, *Houses of Parliament, London* and *Waterloo Bridge, Sunlight Effect*.
+The UI uses an impressionist-inspired light theme with a liquid-glass treatment: each page has a full-page
+background painting, and every section is frosted glass floating on it. Colours and fonts are in
+`.streamlit/config.toml`, the glass in `app/style.css`, and the components in `app/ui.py`. All artwork is
+public domain (CC0).
 
 ## License
 
